@@ -52,6 +52,7 @@ class InfiniteDataLoader:
 class BasicDataset:
     offset = 1000
     tokenizer = BertTokenizerFast.from_pretrained("fnlp/cpt-large")
+    data_dir = '/remote-home/share/ChineseData/chineseeval'
 
     def __init__(self, path, has_test=False, n_prompt_tokens=50):
         self.path = path
@@ -110,7 +111,7 @@ class BasicDataset:
         }
 
     def get_infinite_dataloader(self, batch_size=32):
-        return InfiniteDataLoader(self.get_dataset(), batch_size=batch_size, drop_last=True, shuffle=True, collate_fn=self.collate, num_workers=2)
+        return InfiniteDataLoader(self.get_dataset(), batch_size=batch_size, drop_last=True, shuffle=True, collate_fn=self.collate, persistent_workers=True, num_workers=2)
 
 
 class TCNLIBasicDataset(BasicDataset):
@@ -230,7 +231,7 @@ class ExtractiveQABasicDataset(BasicDataset):
 class AFQMCDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/AFQMC/AFQMC.py',
+            path=f'{self.data_dir}/AFQMC/AFQMC.py',
             labellist=["不同", "相似"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -244,7 +245,7 @@ class AFQMCDataset(TCNLIBasicDataset):
 class OcnliDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/ocnli/ocnli.py',
+            path=f'{self.data_dir}/ocnli/ocnli.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -258,7 +259,7 @@ class OcnliDataset(TCNLIBasicDataset):
 class PawsDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/paws/paws.py',
+            path=f'{self.data_dir}/paws/paws.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -272,7 +273,7 @@ class PawsDataset(TCNLIBasicDataset):
 class CMNLIDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/CMNLI/cmnli.py',
+            path=f'{self.data_dir}/CMNLI/cmnli.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -286,7 +287,7 @@ class CMNLIDataset(TCNLIBasicDataset):
 class ChnSentiCorpDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/chnsenticorp/chnsenticorp.py',
+            path=f'{self.data_dir}/chnsenticorp/chnsenticorp.py',
             labellist=["负面", "正面"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -300,7 +301,7 @@ class ChnSentiCorpDataset(TCNLIBasicDataset):
 class THUCNewsDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/THUCNews/thuc_news.py',
+            path=f'{self.data_dir}/THUCNews/thuc_news.py',
             labellist=["体育", "娱乐", "财经", "教育", "时尚", "八卦", "游戏", "社会", "科技", "经济"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -314,7 +315,7 @@ class THUCNewsDataset(TCNLIBasicDataset):
 class BQDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(BQDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/bq_corpus/bq_corpus.py',
+            path=f'{self.data_dir}/bq_corpus/bq_corpus.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -328,7 +329,7 @@ class BQDataset(TCNLIBasicDataset):
 class ChipCtcDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(ChipCtcDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/CHIP_CTC/CHIP_CTC.py',
+            path=f'{self.data_dir}/CHIP_CTC/CHIP_CTC.py',
             labellist=['疾病', '症状', '迹象', '孕期', '肿瘤', '过敏', '口腔', '药学', '疗法', '设备', '护理', '诊断', '年龄',
                        '性别', '教育', '地址', '种族', '意愿', '容量', '伦理', '睡眠', '运动', '饮食', '吸烟', '献血', '就医',
                        '残障', '健康', '数据', '综合', '饮酒者', '性相关', '符合协议', '成瘾行为', '器官组织', '预期寿命',
@@ -345,7 +346,7 @@ class ChipCtcDataset(TCNLIBasicDataset):
 class ChipStsDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(ChipStsDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/CHIP_STS/CHIP_STS.py',
+            path=f'{self.data_dir}/CHIP_STS/CHIP_STS.py',
             labellist=["不同", "相似"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -359,7 +360,7 @@ class ChipStsDataset(TCNLIBasicDataset):
 class ClueWSCDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(ClueWSCDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/cluewsc/cluewsc.py',
+            path=f'{self.data_dir}/cluewsc/cluewsc.py',
             labellist=["不同", "相同"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -373,7 +374,7 @@ class ClueWSCDataset(TCNLIBasicDataset):
 class CSLDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(CSLDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/csl/csl.py',
+            path=f'{self.data_dir}/csl/csl.py',
             labellist=["不同", "相同"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -387,7 +388,7 @@ class CSLDataset(TCNLIBasicDataset):
 class FinReDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(FinReDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/fin_re/fin_re.py',
+            path=f'{self.data_dir}/fin_re/fin_re.py',
             labellist=['未知', '注资', '拥有', '纠纷', '自己', '增持', '重组', '买资', '签约', '持股', '交易', '入股', '转让', '成立', '分析', '合作',
                        '帮助', '发行', '商讨', '合并', '竞争', '订单', '减持', '合资', '收购', '借壳', '欠款', '被发行', '被转让', '被成立', '被注资',
                        '被持股', '被拥有', '被收购', '被帮助', '被借壳', '被买资', '被欠款', '被增持', '拟收购', '被减持', '被分析', '被入股', '被拟收购'],
@@ -403,7 +404,7 @@ class FinReDataset(TCNLIBasicDataset):
 class C3Dataset(MultipleChoiceQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(C3Dataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/C3/C3.py',
+            path=f'{self.data_dir}/C3/C3.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False
         )
@@ -415,7 +416,7 @@ class C3Dataset(MultipleChoiceQABasicDataset):
 class DogWhistleDataset(MultipleChoiceQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(DogWhistleDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/Dog_whistle/dog_whistle.py',
+            path=f'{self.data_dir}/Dog_whistle/dog_whistle.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False
         )
@@ -427,7 +428,7 @@ class DogWhistleDataset(MultipleChoiceQABasicDataset):
 # class CAILDataset(ExtractiveQABasicDataset):
 #     def __init__(self, n_prompt_tokens=50):
 #         super(CAILDataset, self).__init__(
-#             path='/remote-home/share/ChineseData/chineseeval/CAIL/CAIL.py',
+#             path=f'{self.data_dir}/CAIL/CAIL.py',
 #             n_prompt_tokens=n_prompt_tokens,
 #             has_test=False,
 #             has_is_impossible=True
@@ -437,7 +438,7 @@ class DogWhistleDataset(MultipleChoiceQABasicDataset):
 class Cmrc2018Dataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(Cmrc2018Dataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/cmrc2018/cmrc2018.py',
+            path=f'{self.data_dir}/cmrc2018/cmrc2018.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -447,7 +448,7 @@ class Cmrc2018Dataset(ExtractiveQABasicDataset):
 class DRCDDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(DRCDDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/drcd/drcd.py',
+            path=f'{self.data_dir}/drcd/drcd.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -457,7 +458,7 @@ class DRCDDataset(ExtractiveQABasicDataset):
 class DuReaderChecklistDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(DuReaderChecklistDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/dureader_checklist/dureader_checklist.py',
+            path=f'{self.data_dir}/dureader_checklist/dureader_checklist.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=True
@@ -467,7 +468,7 @@ class DuReaderChecklistDataset(ExtractiveQABasicDataset):
 class DuReaderRobustDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(DuReaderRobustDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/dureader_robust/dureader_robust.py',
+            path=f'{self.data_dir}/dureader_robust/dureader_robust.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -477,7 +478,7 @@ class DuReaderRobustDataset(ExtractiveQABasicDataset):
 class Fudan_tcDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/Fudan_tc/fudan_tc.py',
+            path=f'{self.data_dir}/Fudan_tc/fudan_tc.py',
             labellist=["艺术", "文学", "教育", "哲学", "历史", "空间", "能源", "电力", "交流",
                        "计算机", "矿业", "运输", "环境", "建筑", "金融", "法律", "医药", "军事", "政治", "体育"],
             n_prompt_tokens=n_prompt_tokens,
@@ -492,7 +493,7 @@ class Fudan_tcDataset(TCNLIBasicDataset):
 # class iflytekDataset(TCNLIBasicDataset):
 #     def __init__(self, n_prompt_tokens=50):
 #         super().__init__(
-#             path='/remote-home/share/ChineseData/chineseeval/iflytek/iflytek.py',
+#             path=f'{self.data_dir}/iflytek/iflytek.py',
 #             labellist=["打车", "地图导航", "免费WIFI", "租车", "同城服务", "快递物流", "婚庆", "家政", "公共交通", "政务", "社区服务", "薅羊毛", "魔幻",
 #                        "仙侠", "卡牌", "飞行空战", "射击游戏", "休闲益智", "动作类", "体育竞技", "棋牌中心", "经营养成", "策略", "MOBA", "辅助工具", "约会社交",
 #                        "即时通讯", "工作社交", "论坛圈子", "婚恋社交", "情侣社交", "社交工具", "生活社交", "微博博客", "新闻", "漫画", "小说", "技术", "教辅",
@@ -514,7 +515,7 @@ class Fudan_tcDataset(TCNLIBasicDataset):
 class KUAKE_QICDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/KUAKE_QIC/KUAKE_QIC.py',
+            path=f'{self.data_dir}/KUAKE_QIC/KUAKE_QIC.py',
             labellist=["治疗方案", "疾病表述", "指标解读", "病情诊断", "就医建议", "注意事项", "后果表述", "病因分析", "功效作用", "医疗费用", "其他"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -529,7 +530,7 @@ class KUAKE_QICDataset(TCNLIBasicDataset):
 class nlpcc_dbqaDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/nlpcc_dbqa/nlpcc_dbqa.py',
+            path=f'{self.data_dir}/nlpcc_dbqa/nlpcc_dbqa.py',
             labellist=["矛盾", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -544,7 +545,7 @@ class nlpcc_dbqaDataset(TCNLIBasicDataset):
 class KUAKE_QQRDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/KUAKE_QQR/KUAKE_QQR.py',
+            path=f'{self.data_dir}/KUAKE_QQR/KUAKE_QQR.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -559,7 +560,7 @@ class KUAKE_QQRDataset(TCNLIBasicDataset):
 # class KUAKE_QTRDataset(TCNLIBasicDataset):
 #     def __init__(self, n_prompt_tokens=50):
 #         super().__init__(
-#             path='/remote-home/share/ChineseData/chineseeval/KUAKE_QTR/KUAKE_QTR.py',
+#             path=f'{self.data_dir}/KUAKE_QTR/KUAKE_QTR.py',
 #             labellist=['0', '1', '2', '3'],
 #             n_prompt_tokens=n_prompt_tokens,
 #             has_test=True
@@ -571,7 +572,7 @@ class KUAKE_QQRDataset(TCNLIBasicDataset):
 class LCQMCDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/LCQMC/LCQMC.py',
+            path=f'{self.data_dir}/LCQMC/LCQMC.py',
             labellist=["匹配", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -586,7 +587,7 @@ class LCQMCDataset(TCNLIBasicDataset):
 # class nlpcc_emotion_tcDataset(TCNLIBasicDataset):
 #     def __init__(self, n_prompt_tokens=50):
 #         super().__init__(
-#             path='/remote-home/share/ChineseData/chineseeval/nlpcc_emotion_tc/nlpcc_emotion_tc.py',
+#             path=f'{self.data_dir}/nlpcc_emotion_tc/nlpcc_emotion_tc.py',
 #             labellist=["快乐", "悲伤", "愤怒", "恐惧", "惊喜"],
 #             n_prompt_tokens=n_prompt_tokens,
 #             has_test=True
@@ -598,7 +599,7 @@ class LCQMCDataset(TCNLIBasicDataset):
 class nlpcc_tcDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/nlpcc_tc/nlpcc_tc.py',
+            path=f'{self.data_dir}/nlpcc_tc/nlpcc_tc.py',
             labellist=["负面", "正面"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -612,7 +613,7 @@ class nlpcc_tcDataset(TCNLIBasicDataset):
 class SanWenDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/SanWen/sanwen.py',
+            path=f'{self.data_dir}/SanWen/sanwen.py',
             labellist=["未知", "创建", "使用", "贴近", "位于", "占有", "社会相关", "家庭关系", "一般与特别", "部分与整体"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -626,7 +627,7 @@ class SanWenDataset(TCNLIBasicDataset):
 class tnewsDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/tnews/tnews.py',
+            path=f'{self.data_dir}/tnews/tnews.py',
             labellist=["房产", "汽车", "金融", "体育", "文化", "娱乐", "教育", "科技", "军事", "旅游", "世界", "农业", "股票",
                        "游戏", "故事"],
             n_prompt_tokens=n_prompt_tokens,
@@ -641,7 +642,7 @@ class tnewsDataset(TCNLIBasicDataset):
 class toutiao_tcDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/toutiao_tc/toutiao_tc.py',
+            path=f'{self.data_dir}/toutiao_tc/toutiao_tc.py',
             labellist=["房产", "汽车", "金融", "体育", "文化", "娱乐", "教育", "科技", "军事", "旅游", "世界", "农业", "股票",
                        "游戏", "故事"],
             n_prompt_tokens=n_prompt_tokens,
@@ -656,7 +657,7 @@ class toutiao_tcDataset(TCNLIBasicDataset):
 class xnliDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/xnli/xnli_zh.py',
+            path=f'{self.data_dir}/xnli/xnli_zh.py',
             labellist=["矛盾", "中立", "蕴含"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -670,7 +671,7 @@ class xnliDataset(TCNLIBasicDataset):
 class CoteBdDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(CoteBdDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/COTE_BD/cote_bd.py',
+            path=f'{self.data_dir}/COTE_BD/cote_bd.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -680,7 +681,7 @@ class CoteBdDataset(ExtractiveQABasicDataset):
 class CoteDpDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(CoteDpDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/COTE_DP/cote_dp.py',
+            path=f'{self.data_dir}/COTE_DP/cote_dp.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -690,7 +691,7 @@ class CoteDpDataset(ExtractiveQABasicDataset):
 class CoteMfwDataset(ExtractiveQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(CoteMfwDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/COTE_MFW/cote_mfw.py',
+            path=f'{self.data_dir}/COTE_MFW/cote_mfw.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
             has_is_impossible=False
@@ -700,7 +701,7 @@ class CoteMfwDataset(ExtractiveQABasicDataset):
 class AmazonDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/amazon/amazon.py',
+            path=f'{self.data_dir}/amazon/amazon.py',
             labellist=["非常差", "较差", '一般', '较好', '非常好'],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -714,7 +715,7 @@ class AmazonDataset(TCNLIBasicDataset):
 class BaoxianzhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/baoxianzhidao/baoxianzhidao.py',
+            path=f'{self.data_dir}/baoxianzhidao/baoxianzhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -728,7 +729,7 @@ class BaoxianzhidaoDataset(TCNLIBasicDataset):
 class DianxinzhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/dianxinzhidao/dianxinzhidao.py',
+            path=f'{self.data_dir}/dianxinzhidao/dianxinzhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -742,7 +743,7 @@ class DianxinzhidaoDataset(TCNLIBasicDataset):
 class FinancezhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/financezhidao/financezhidao.py',
+            path=f'{self.data_dir}/financezhidao/financezhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -756,7 +757,7 @@ class FinancezhidaoDataset(TCNLIBasicDataset):
 class LawzhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/lawzhidao/lawzhidao.py',
+            path=f'{self.data_dir}/lawzhidao/lawzhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -770,7 +771,7 @@ class LawzhidaoDataset(TCNLIBasicDataset):
 class LiantongzhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/liantongzhidao/liantongzhidao.py',
+            path=f'{self.data_dir}/liantongzhidao/liantongzhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -784,7 +785,7 @@ class LiantongzhidaoDataset(TCNLIBasicDataset):
 class NonghangzhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/nonghangzhidao/nonghangzhidao.py',
+            path=f'{self.data_dir}/nonghangzhidao/nonghangzhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -798,7 +799,7 @@ class NonghangzhidaoDataset(TCNLIBasicDataset):
 class TouzizhidaoDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/touzizhidao/touzizhidao.py',
+            path=f'{self.data_dir}/touzizhidao/touzizhidao.py',
             labellist=["符合", "不符"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -812,7 +813,7 @@ class TouzizhidaoDataset(TCNLIBasicDataset):
 class CCPMDataset(MultipleChoiceQABasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(CCPMDataset, self).__init__(
-            path='/remote-home/share/ChineseData/chineseeval/CCPM/ccpm.py',
+            path=f'{self.data_dir}/CCPM/ccpm.py',
             n_prompt_tokens=n_prompt_tokens,
             has_test=False
         )
@@ -824,7 +825,7 @@ class CCPMDataset(MultipleChoiceQABasicDataset):
 class DianpingDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/dianping/dianping.py',
+            path=f'{self.data_dir}/dianping/dianping.py',
             labellist=["非常差", "较差", '一般', '较好', '非常好'],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -838,7 +839,7 @@ class DianpingDataset(TCNLIBasicDataset):
 class DMSCDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/dmsc/dmsc.py',
+            path=f'{self.data_dir}/dmsc/dmsc.py',
             labellist=["非常差", "较差", '一般', '较好', '非常好'],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -852,7 +853,7 @@ class DMSCDataset(TCNLIBasicDataset):
 class OnlineShppingDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/online_shopping/online_shopping.py',
+            path=f'{self.data_dir}/online_shopping/online_shopping.py',
             labellist=["负面", "正面"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -866,7 +867,7 @@ class OnlineShppingDataset(TCNLIBasicDataset):
 class WaimaiDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/waimai/waimai.py',
+            path=f'{self.data_dir}/waimai/waimai.py',
             labellist=["负面", "正面"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
@@ -880,7 +881,7 @@ class WaimaiDataset(TCNLIBasicDataset):
 class WeiboSentimentDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super().__init__(
-            path='/remote-home/share/ChineseData/chineseeval/weibo_sentiment/weibo_sentiment.py',
+            path=f'{self.data_dir}/weibo_sentiment/weibo_sentiment.py',
             labellist=["负面", "正面"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
