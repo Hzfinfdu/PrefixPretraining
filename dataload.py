@@ -52,7 +52,7 @@ class InfiniteDataLoader:
 class BasicDataset:
     offset = 1000
     tokenizer = BertTokenizerFast.from_pretrained("fnlp/cpt-large")
-    data_dir = '/remote-home/share/ChineseData/chineseeval'
+    data_dir = '/home/ma-user/work/zfhe/chineseeval'
 
     def __init__(self, path, has_test=False, n_prompt_tokens=50):
         self.path = path
@@ -316,14 +316,14 @@ class BQDataset(TCNLIBasicDataset):
     def __init__(self, n_prompt_tokens=50):
         super(BQDataset, self).__init__(
             path=f'{self.data_dir}/bq_corpus/bq_corpus.py',
-            labellist=["矛盾", "中立", "蕴含"],
+            labellist=["不同", "相同"],
             n_prompt_tokens=n_prompt_tokens,
             has_test=False,
-            label_mask=[1, 0, 1, 1, 0, 1, 1, 0]
+            label_mask=[1, 0, 1, 1, 0]
         )
 
     def input_template(self, example):
-        return f'意思判别："{example["text1"]}"与"{example["text2"]}"的关系是？选项：'
+        return f'意思判别："{example["text1"]}"与"{example["text2"]}"的意思是？选项：'
 
 
 class ChipCtcDataset(TCNLIBasicDataset):
