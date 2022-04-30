@@ -5,8 +5,8 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 
-def get_infinite_train_iterator(bsz, n_prompt_tokens):
-    loader = torch.utils.data.DataLoader(InfiniteDataset(bsz, n_prompt_tokens), batch_size=1, drop_last=True, shuffle=False, num_workers=4)
+def get_infinite_train_iterator(bsz=32, n_prompt_tokens=50):
+    loader = torch.utils.data.DataLoader(InfiniteDataset(bsz, n_prompt_tokens), batch_size=1, shuffle=False, num_workers=4, collate_fn=lambda x: x)
     return iter(loader)
 
 def get_dataloaders(batch_size=32, split='validation'):
@@ -21,39 +21,40 @@ def get_dataloaders(batch_size=32, split='validation'):
 class InfiniteDataset(torch.utils.data.Dataset):
     def __init__(self, batch_size=32, n_prompt_tokens=50):
         self.ds_list = [cls(n_prompt_tokens).get_dataset() for cls in Dataset_list]
-        self.len_list = [len(ds) // batch_size for ds in self.loader_list]
-        self.len_count = [0 for _ in self.loader_list]
+        self.len_list = [len(ds) // batch_size for ds in self.ds_list]
+        self.len_count = [0 for _ in self.ds_list]
         self.batch_size = batch_size
         self.num_ds = len(Dataset_list)
         self.perm = torch.randperm(self.num_ds)
 
     def __len__(self):
-        return 1e20  # infinity
+        return 1000000000  # infinity
 
     def __getitem__(self, idx):
         perm_count = idx % self.num_ds
         if perm_count == 0:
             self.perm = torch.randperm(self.num_ds)
-        ds_idx = self.len_count[self.perm[perm_count]]
-        data = self.ds_list[ds_idx][ds_idx * self.batch_size: (ds_idx + 1) * self.batch_size]
-        self.len_count[self.perm[perm_count]] += 1
-        if self.len_count[self.perm[perm_count]] == self.len_list[self.perm[perm_count]]:
-            self.len_count[self.perm[perm_count]] = 0
-        return self.collate(data)
+        ds_idx = self.perm[perm_count]
+        batch_idx = self.len_count[ds_idx]
+        data = self.ds_list[ds_idx][batch_idx * self.batch_size: (batch_idx + 1) * self.batch_size]
+        self.len_count[ds_idx] += 1
+        if self.len_count[ds_idx] == self.len_list[ds_idx]:
+            self.len_count[ds_idx] = 0
+        return self.collate(data), ds_idx
 
     @staticmethod
     def collate(batch_input):
-        input_ids = [torch.tensor(d['input_ids']) for d in batch_input]
-        start_positions = torch.tensor([d['start_positions'] for d in batch_input])
-        end_positions = torch.tensor([d['end_positions'] for d in batch_input])
+        input_ids = [torch.tensor(i) for i in batch_input['input_ids']]
+        start_positions = torch.tensor(batch_input['start_positions'])
+        end_positions = torch.tensor(batch_input['end_positions'])
         input_ids = pad_sequence(input_ids, batch_first=True)
         label_mask = None
         label = None
-        if 'label_mask' in batch_input[0].keys():
-            label_mask = [torch.tensor(d['label_mask']) for d in batch_input]
+        if 'label_mask' in batch_input.keys():
+            label_mask = [torch.tensor(i) for i in batch_input['label_mask']]
             label_mask = pad_sequence(label_mask, batch_first=True)
             assert label_mask.shape == input_ids.shape
-            label = torch.tensor([d['label'] for d in batch_input])
+            label = torch.tensor(batch_input['label'])
         return {
             'input_ids': input_ids,
             'start_positions': start_positions,
@@ -66,7 +67,7 @@ class InfiniteDataset(torch.utils.data.Dataset):
 class BasicDataset:
     offset = 1000
     tokenizer = BertTokenizerFast.from_pretrained("fnlp/cpt-large")
-    data_dir = '/home/ma-user/work/zfhe/chineseeval'
+    data_dir = '/remote-home/share/ChineseData/chineseeval'
 
     def __init__(self, path, has_test=False, n_prompt_tokens=50):
         self.path = path
@@ -908,31 +909,35 @@ Dataset_list = [
     nlpcc_tcDataset,
     SanWenDataset,
     # tnewsDataset,
-    toutiao_tcDataset,
-    xnliDataset,
-    nlpcc_dbqaDataset,
-    # CoteBdDataset,
-    CoteDpDataset,
-    CoteMfwDataset,
-    CCPMDataset,
-    AmazonDataset,
-    BaoxianzhidaoDataset,
-    DianpingDataset,
-    DianxinzhidaoDataset,
-    DMSCDataset,
-    FinancezhidaoDataset,
-    LawzhidaoDataset,
-    LiantongzhidaoDataset,
-    NonghangzhidaoDataset,
-    OnlineShppingDataset,
-    TouzizhidaoDataset,
-    WaimaiDataset,
-    WeiboSentimentDataset
+    # toutiao_tcDataset,
+    # xnliDataset,
+    # nlpcc_dbqaDataset,
+    # # CoteBdDataset,
+    # CoteDpDataset,
+    # CoteMfwDataset,
+    # CCPMDataset,
+    # AmazonDataset,
+    # BaoxianzhidaoDataset,
+    # DianpingDataset,
+    # DianxinzhidaoDataset,
+    # DMSCDataset,
+    # FinancezhidaoDataset,
+    # LawzhidaoDataset,
+    # LiantongzhidaoDataset,
+    # NonghangzhidaoDataset,
+    # OnlineShppingDataset,
+    # TouzizhidaoDataset,
+    # WaimaiDataset,
+    # WeiboSentimentDataset
 ]
 
 num_datasets = len(Dataset_list)
 
 if __name__ == '__main__':
-    a = ChnSentiCorpDataset().get_dataset('downstream', k_shot=32, seed=42)
-    print(a['train']['label'])
+    it = get_infinite_train_iterator(32, 50)
+    a = [0] * 19
+    for i in range(19000):
+        a[next(it)[0][1].item()] += 1
+    print(a)
+
 
