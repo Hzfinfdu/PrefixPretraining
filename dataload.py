@@ -1,52 +1,66 @@
-import copy
 from datasets import load_dataset, concatenate_datasets, DatasetDict
 import torch
-import random
 from transformers import BertTokenizerFast
 from torch.nn.utils.rnn import pad_sequence
 
-class TrainDataLoader:
-    """
-    封装了全部细节，只需要一直next，就可以保证每|NumOfDataset|个iter必每个任务都出现一遍，并且顺序随机。
-    数据量长短的问题已在InfiniteDataLoader类中解决。
-    """
 
-    def __init__(self, batch_size=32, n_prompt_tokens=50):
-        self.count = 0
-        self.perm = torch.randperm(num_datasets)
-        self.loader_list = [cls(n_prompt_tokens).get_infinite_dataloader(batch_size) for cls in Dataset_list]
 
-    def __next__(self):
-        task_id = self.perm[self.count]
-        next_batch = self.loader_list[task_id].__next__()
-        # next_batch['task_id'] = self.perm[self.count].unsqueeze(0)
-        self.count += 1
-        if self.count == num_datasets:
-            self.count = 0
-            self.perm = torch.randperm(num_datasets)
-        return next_batch, task_id.unsqueeze(0)
-
+def get_infinite_train_iterator(bsz, n_prompt_tokens):
+    loader = torch.utils.data.DataLoader(InfiniteDataset(bsz, n_prompt_tokens), batch_size=1, drop_last=True, shuffle=False, num_workers=4)
+    return iter(loader)
 
 def get_dataloaders(batch_size=32, split='validation'):
     dev_dataset = [cls().get_dataset(split) for cls in Dataset_list]
     return [
         torch.utils.data.DataLoader(ds, batch_size=batch_size, drop_last=True, shuffle=False,
-                                    collate_fn=BasicDataset.collate, num_workers=4)
+                                    collate_fn=InfiniteDataset.collate, num_workers=4)
         for ds in dev_dataset
     ]
 
 
-class InfiniteDataLoader:
-    def __init__(self, *args, **kwargs):
-        self.loader = torch.utils.data.DataLoader(*args, **kwargs)
-        self.generator = self.loader.__iter__()
+class InfiniteDataset(torch.utils.data.Dataset):
+    def __init__(self, batch_size=32, n_prompt_tokens=50):
+        self.ds_list = [cls(n_prompt_tokens).get_dataset() for cls in Dataset_list]
+        self.len_list = [len(ds) // batch_size for ds in self.loader_list]
+        self.len_count = [0 for _ in self.loader_list]
+        self.batch_size = batch_size
+        self.num_ds = len(Dataset_list)
+        self.perm = torch.randperm(self.num_ds)
 
-    def __next__(self):
-        try:
-            return self.generator.__next__()
-        except StopIteration:
-            self.generator._reset(self.loader)
-            return self.generator.__next__()
+    def __len__(self):
+        return 1e20  # infinity
+
+    def __getitem__(self, idx):
+        perm_count = idx % self.num_ds
+        if perm_count == 0:
+            self.perm = torch.randperm(self.num_ds)
+        ds_idx = self.len_count[self.perm[perm_count]]
+        data = self.ds_list[ds_idx][ds_idx * self.batch_size: (ds_idx + 1) * self.batch_size]
+        self.len_count[self.perm[perm_count]] += 1
+        if self.len_count[self.perm[perm_count]] == self.len_list[self.perm[perm_count]]:
+            self.len_count[self.perm[perm_count]] = 0
+        return self.collate(data)
+
+    @staticmethod
+    def collate(batch_input):
+        input_ids = [torch.tensor(d['input_ids']) for d in batch_input]
+        start_positions = torch.tensor([d['start_positions'] for d in batch_input])
+        end_positions = torch.tensor([d['end_positions'] for d in batch_input])
+        input_ids = pad_sequence(input_ids, batch_first=True)
+        label_mask = None
+        label = None
+        if 'label_mask' in batch_input[0].keys():
+            label_mask = [torch.tensor(d['label_mask']) for d in batch_input]
+            label_mask = pad_sequence(label_mask, batch_first=True)
+            assert label_mask.shape == input_ids.shape
+            label = torch.tensor([d['label'] for d in batch_input])
+        return {
+            'input_ids': input_ids,
+            'start_positions': start_positions,
+            'end_positions': end_positions,
+            'label_mask': label_mask,
+            'label': label
+        }
 
 
 class BasicDataset:
@@ -88,30 +102,6 @@ class BasicDataset:
         else:
             dataset = load_dataset(self.path, split=split)
         return dataset.map(self.convert_examples, remove_columns=dataset.column_names)
-
-    @staticmethod
-    def collate(batch_input):
-        input_ids = [torch.tensor(d['input_ids']) for d in batch_input]
-        start_positions = torch.tensor([d['start_positions'] for d in batch_input])
-        end_positions = torch.tensor([d['end_positions'] for d in batch_input])
-        input_ids = pad_sequence(input_ids, batch_first=True)
-        label_mask = None
-        label = None
-        if 'label_mask' in batch_input[0].keys():
-            label_mask = [torch.tensor(d['label_mask']) for d in batch_input]
-            label_mask = pad_sequence(label_mask, batch_first=True)
-            assert label_mask.shape == input_ids.shape
-            label = torch.tensor([d['label'] for d in batch_input])
-        return {
-            'input_ids': input_ids,
-            'start_positions': start_positions,
-            'end_positions': end_positions,
-            'label_mask': label_mask,
-            'label': label
-        }
-
-    def get_infinite_dataloader(self, batch_size=32):
-        return InfiniteDataLoader(self.get_dataset(), batch_size=batch_size, drop_last=True, shuffle=True, collate_fn=self.collate, persistent_workers=True, num_workers=2)
 
 
 class TCNLIBasicDataset(BasicDataset):
